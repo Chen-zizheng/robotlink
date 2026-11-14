@@ -21,10 +21,11 @@
 
 ```bash
 pip install pytest          # 只跑测试的话只需要这个
-python -m pytest -q         # 20 passed
+python -m pytest -q         # 24 passed
 
 python bench/campaign.py 20 # 故障矩阵，输出 JSON 行
 python bench/soak.py --seconds 30 --drop 0.2 --dup 0.2
+python bench/trace.py       # 录一轮三端日志，再对齐检查
 ```
 
 `pyproject.toml` 里配了 `pythonpath = ["src"]`，不用装包也能 import。
@@ -79,11 +80,14 @@ type 取 CMD / STATUS / ACK / HEARTBEAT / ESTOP。crc16 覆盖 type、seq、leng
 
 ### 单元测试
 
-20 条，分三组：
+24 条，分四组：
 
 - 协议 6 条：往返、6 种切分位置各喂一次半包、一包三帧的粘包、坏 CRC 后仍能取出后面的好帧、前缀脏数据重同步、超长负载在编码端被拒。
 - 状态机 6 条：启动/停止、非法迁移被拒且计数、急停后必须 clear、重复 seq 幂等、迁移表里每个目标状态都存在。
 - 端到端 3 条：丢包+重复的链路上走完 start/stop、一次写入里 estop 抢占、代理到点断连后客户端重连。
+- 日志对齐 4 条：干净时间线无违例、慢应答按毫秒标出、只发未收算无应答、只收未发也算违例。
+
+`bench/trace.py` 跑一轮真实链路（丢 10%）会写 `bench/../runs/cloud.jsonl` 和 `robot.jsonl`，2026-11-14 那次是 11 行记录、0.842 秒、0 违例、0 无应答。
 
 ## 已知限制
 
