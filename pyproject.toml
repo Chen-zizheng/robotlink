@@ -1,0 +1,10 @@
+[project]
+name = "robotlink"
+version = "0.1.0"
+description = "机器人上下位机联调与故障注入工具：帧协议、状态机、丢包/重复/乱序代理、日志对齐"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
